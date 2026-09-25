@@ -1,0 +1,641 @@
+openapi: 3.0.3
+info:
+  title: Procezo API
+  version: 1.0.0
+paths:
+  /api/v1/audit/:
+    get:
+      operationId: audit_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: unit
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - audit
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditEventList'
+          description: ''
+  /api/v1/dossiers/:
+    get:
+      operationId: dossiers_list
+      parameters:
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - -created_at
+          - -reference
+          - created_at
+          - reference
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: reference
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+      - in: query
+        name: unit
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - dossiers
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaseList'
+          description: ''
+    post:
+      operationId: dossiers_create
+      tags:
+      - dossiers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+          description: ''
+  /api/v1/dossiers/{id}/:
+    get:
+      operationId: dossiers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - dossiers
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+          description: ''
+    patch:
+      operationId: dossiers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - dossiers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+          description: ''
+  /api/v1/dossiers/{id}/affectations/:
+    get:
+      operationId: dossiers_affectations_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - dossiers
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaseAssignmentReadList'
+          description: ''
+    post:
+      operationId: dossiers_affectations_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - dossiers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+          description: ''
+  /api/v1/dossiers/{id}/chronologie/:
+    get:
+      operationId: dossiers_chronologie_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - dossiers
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCaseActionList'
+          description: ''
+  /api/v1/session/:
+    get:
+      operationId: session_retrieve
+      tags:
+      - session
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+          description: ''
+    post:
+      operationId: session_create
+      tags:
+      - session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+          description: ''
+    delete:
+      operationId: session_destroy
+      tags:
+      - session
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Assignment:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        assignee:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          maxLength: 500
+      required:
+      - assignee
+      - reason
+      - version
+    AuditEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        occurred_at:
+          type: string
+          format: date-time
+          readOnly: true
+        actor:
+          type: integer
+        unit:
+          type: string
+          format: uuid
+        classification:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        action:
+          type: string
+          maxLength: 64
+        resource_type:
+          type: string
+          maxLength: 32
+        resource_id:
+          type: string
+          format: uuid
+          nullable: true
+        request_id:
+          type: string
+          format: uuid
+        details: {}
+      required:
+      - action
+      - actor
+      - id
+      - occurred_at
+      - request_id
+      - resource_type
+      - unit
+    Case:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+        unit:
+          type: string
+          format: uuid
+          readOnly: true
+        unit_code:
+          type: string
+          readOnly: true
+        classification:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        assignee:
+          type: integer
+          readOnly: true
+        assignee_username:
+          type: string
+          readOnly: true
+        next_action:
+          type: string
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assignee
+      - assignee_username
+      - classification
+      - created_at
+      - id
+      - next_action
+      - reference
+      - status
+      - unit
+      - unit_code
+      - updated_at
+      - version
+    CaseAction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          type: string
+          maxLength: 24
+        actor:
+          type: integer
+        next_action:
+          type: string
+          maxLength: 240
+        status:
+          type: string
+          maxLength: 20
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor
+      - created_at
+      - id
+      - kind
+      - next_action
+      - status
+      - version
+    CaseAssignmentRead:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        previous_assignee:
+          type: integer
+          nullable: true
+        new_assignee:
+          type: integer
+        author:
+          type: integer
+        reason:
+          type: string
+          maxLength: 500
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+      required:
+      - author
+      - created_at
+      - id
+      - new_assignee
+      - reason
+      - version
+    CaseCreate:
+      type: object
+      properties:
+        unit:
+          type: string
+          format: uuid
+        classification:
+          $ref: '#/components/schemas/ClassificationEnum'
+        assignee:
+          type: integer
+          minimum: 1
+        next_action:
+          type: string
+          maxLength: 240
+        assignment_reason:
+          type: string
+          maxLength: 500
+      required:
+      - assignee
+      - assignment_reason
+      - classification
+      - next_action
+      - unit
+    CaseUpdate:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        next_action:
+          type: string
+          maxLength: 240
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - version
+    ClassificationEnum:
+      enum:
+      - 0
+      - 1
+      type: integer
+      description: |-
+        * `0` - 0
+        * `1` - 1
+    Login:
+      type: object
+      properties:
+        username:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+      required:
+      - password
+      - username
+    PaginatedAuditEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEvent'
+    PaginatedCaseActionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseAction'
+    PaginatedCaseAssignmentReadList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseAssignmentRead'
+    PaginatedCaseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Case'
+    SessionResponse:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+      required:
+      - authenticated
+    StatusEnum:
+      enum:
+      - open
+      - in_progress
+      type: string
+      description: |-
+        * `open` - Ouvert
+        * `in_progress` - En cours
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
