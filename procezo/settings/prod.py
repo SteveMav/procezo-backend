@@ -8,10 +8,15 @@ if not os.environ.get("PROCEZO_SECRET_KEY") or SECRET_KEY == "development-only-i
     raise ImproperlyConfigured("PROCEZO_SECRET_KEY est obligatoire en production")
 if not ALLOWED_HOSTS:
     raise ImproperlyConfigured("PROCEZO_ALLOWED_HOSTS est obligatoire en production")
-if not os.environ.get("PROCEZO_DB_PATH"):
-    raise ImproperlyConfigured("PROCEZO_DB_PATH est obligatoire en production")
-if not os.path.isabs(os.environ["PROCEZO_DB_PATH"]):
-    raise ImproperlyConfigured("PROCEZO_DB_PATH doit être absolu")
+if os.environ.get("PROCEZO_DB_ENGINE") != "postgresql":
+    if not os.environ.get("PROCEZO_DB_PATH"):
+        raise ImproperlyConfigured("PROCEZO_DB_PATH est obligatoire en production")
+    if not os.path.isabs(os.environ["PROCEZO_DB_PATH"]):
+        raise ImproperlyConfigured("PROCEZO_DB_PATH doit être absolu")
+elif not os.environ.get("PROCEZO_PG_PASSWORD"):
+    raise ImproperlyConfigured("PROCEZO_PG_PASSWORD est obligatoire en production")
+if not os.path.isabs(PROCEZO_PRIVATE_FILES_ROOT):
+    raise ImproperlyConfigured("PROCEZO_PRIVATE_FILES_ROOT doit être absolu")
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

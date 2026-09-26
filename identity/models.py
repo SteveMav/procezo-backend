@@ -37,6 +37,15 @@ class Delegation(models.Model):
         CASE_CREATE = "case.create", "Créer un dossier"
         CASE_ASSIGN = "case.assign", "Affecter un dossier"
         AUDIT_READ = "audit.read", "Lire l'audit"
+        INTELLIGENCE_DISTRIBUTE = "intelligence.distribute", "Diffuser un renseignement"
+        SOURCE_READ = "source.read", "Lire une source protégée"
+        SOURCE_WRITE = "source.write", "Enregistrer une source protégée"
+        REQUEST_VALIDATE = "request.validate", "Valider une demande"
+        REQUEST_SIGN = "request.sign", "Constater la signature"
+        REQUEST_ISSUE = "request.issue", "Constater l'émission"
+        DECISION_VALIDATE = "decision.validate", "Valider une suite"
+        GELEC_TRANSFER = "gelec.transfer", "Transmettre vers GELEC"
+        GELEC_CONFIRM = "gelec.confirm", "Confirmer la réception GELEC"
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     unit = models.ForeignKey(Unit, on_delete=models.PROTECT)

@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import transaction
+from django.db.models import CharField, PositiveIntegerField, UUIDField, Value
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -14,7 +15,7 @@ from identity.models import Membership, Unit
 from identity.policy import active_memberships, can, visible_cases
 
 from .models import Case
-from .serializers import AssignmentSerializer, CaseActionSerializer, CaseAssignmentReadSerializer, CaseCreateSerializer, CaseSerializer, CaseUpdateSerializer
+from .serializers import AssignmentSerializer, CaseAssignmentReadSerializer, CaseCreateSerializer, CaseSerializer, CaseTimelineSerializer, CaseUpdateSerializer
 from .service import assign_case, create_case, update_case
 
 
@@ -121,11 +122,19 @@ class CaseViewSet(viewsets.GenericViewSet):
             record(request, action="case.assignments.read", unit=case.unit, resource=case)
         return self.get_paginated_response(CaseAssignmentReadSerializer(page, many=True).data)
 
-    @extend_schema(responses=CaseActionSerializer(many=True))
+    @extend_schema(responses=CaseTimelineSerializer(many=True))
     @action(detail=True, methods=["get"], url_path="chronologie")
     def timeline(self, request, *args, **kwargs):
         case = self.get_object()
-        page = self.paginate_queryset(case.actions.all())
+        columns = ("id", "kind", "actor_id", "next_action", "status", "version", "created_at", "resource_id")
+        actions = case.actions.order_by().annotate(resource_id=Value(None, output_field=UUIDField())).values(*columns)
+        events = case.inspection_events.order_by().annotate(
+            next_action=Value(None, output_field=CharField(max_length=240)),
+            status=Value(None, output_field=CharField(max_length=20)),
+            version=Value(None, output_field=PositiveIntegerField()),
+        ).values(*columns)
+        page = self.paginate_queryset(actions.union(events).order_by("created_at", "id"))
+        rows = [{"id": row["id"], "kind": row["kind"], "actor": row["actor_id"], "next_action": row["next_action"], "status": row["status"], "version": row["version"], "created_at": row["created_at"], "resource_id": row["resource_id"]} for row in page]
         with transaction.atomic():
             record(request, action="case.timeline.read", unit=case.unit, resource=case)
-        return self.get_paginated_response(CaseActionSerializer(page, many=True).data)
+        return self.get_paginated_response(CaseTimelineSerializer(rows, many=True).data)

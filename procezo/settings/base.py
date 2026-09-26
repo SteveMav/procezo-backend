@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 SECRET_KEY = os.environ.get("PROCEZO_SECRET_KEY", "development-only-insecure-key")
@@ -18,6 +19,12 @@ INSTALLED_APPS = [
     "identity",
     "audit",
     "cases",
+    "intelligence",
+    "documents",
+    "requests_app",
+    "inspections",
+    "decisions",
+    "reporting",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -42,7 +49,14 @@ TEMPLATES = [{
     ]},
 }]
 WSGI_APPLICATION = "procezo.wsgi.application"
+db_engine = os.environ.get("PROCEZO_DB_ENGINE", "sqlite")
+if db_engine not in {"sqlite", "postgresql"}:
+    raise ImproperlyConfigured("PROCEZO_DB_ENGINE doit être sqlite ou postgresql")
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": os.environ.get("PROCEZO_DB_PATH", str(BASE_DIR / "db.sqlite3")), "OPTIONS": {"timeout": 5}}}
+if db_engine == "postgresql":
+    DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql", "NAME": os.environ.get("PROCEZO_PG_NAME", "procezo"), "USER": os.environ.get("PROCEZO_PG_USER", "procezo"), "PASSWORD": os.environ.get("PROCEZO_PG_PASSWORD", ""), "HOST": os.environ.get("PROCEZO_PG_HOST", "localhost"), "PORT": os.environ.get("PROCEZO_PG_PORT", "5432")}}
+PROCEZO_PRIVATE_FILES_ROOT = os.environ.get("PROCEZO_PRIVATE_FILES_ROOT", str(BASE_DIR / "private"))
+PROCEZO_CLAMSCAN_PATH = os.environ.get("PROCEZO_CLAMSCAN_PATH", "")
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -69,7 +83,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "platform_api.pagination.StandardPagination",
     "EXCEPTION_HANDLER": "platform_api.errors.exception_handler",
 }
-SPECTACULAR_SETTINGS = {"TITLE": "Procezo API", "VERSION": "1.0.0", "SERVE_INCLUDE_SCHEMA": False, "COMPONENT_SPLIT_PATCH": False}
+SPECTACULAR_SETTINGS = {"TITLE": "Procezo API", "VERSION": "1.4.0", "SERVE_INCLUDE_SCHEMA": False, "COMPONENT_SPLIT_PATCH": False}
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

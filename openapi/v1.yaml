@@ -1,8 +1,52 @@
 openapi: 3.0.3
 info:
   title: Procezo API
-  version: 1.0.0
+  version: 1.4.0
 paths:
+  /api/v1/a-valider/:
+    get:
+      operationId: a_valider_retrieve
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - decisions
+          - requests
+      tags:
+      - a-valider
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationItem'
+          description: ''
+  /api/v1/actes/{id}/telecharger/:
+    get:
+      operationId: actes_telecharger_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - actes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /api/v1/audit/:
     get:
       operationId: audit_list
@@ -35,6 +79,879 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditEventList'
+          description: ''
+  /api/v1/decisions/:
+    get:
+      operationId: decisions_list
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - decisions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDecisionList'
+          description: ''
+    post:
+      operationId: decisions_create
+      tags:
+      - decisions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+          description: ''
+  /api/v1/decisions/{id}/:
+    get:
+      operationId: decisions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - decisions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+          description: ''
+  /api/v1/decisions/{id}/historique/:
+    get:
+      operationId: decisions_historique_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - decisions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDecisionEventList'
+          description: ''
+  /api/v1/decisions/{id}/retourner/:
+    post:
+      operationId: decisions_retourner_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - decisions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionReturn'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+          description: ''
+  /api/v1/decisions/{id}/valider/:
+    post:
+      operationId: decisions_valider_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - decisions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionTransition'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+          description: ''
+  /api/v1/defenses/{id}/:
+    get:
+      operationId: defenses_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - defenses
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Defense'
+          description: ''
+  /api/v1/demandes/:
+    get:
+      operationId: demandes_list
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - demandes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRequestList'
+          description: ''
+    post:
+      operationId: demandes_create
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/demandes/{id}/:
+    get:
+      operationId: demandes_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+    patch:
+      operationId: demandes_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/demandes/{id}/apercu/:
+    get:
+      operationId: demandes_apercu_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/demandes/{id}/constater-emission/:
+    post:
+      operationId: demandes_constater_emission_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Issue'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/demandes/{id}/constater-signature/:
+    post:
+      operationId: demandes_constater_signature_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sign'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/demandes/{id}/elements/{item_id}/appreciations/:
+    get:
+      operationId: demandes_elements_appreciations_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - demandes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAssessmentList'
+          description: ''
+    post:
+      operationId: demandes_elements_appreciations_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - in: path
+        name: item_id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+          description: ''
+  /api/v1/demandes/{id}/historique/:
+    get:
+      operationId: demandes_historique_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - demandes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventList'
+          description: ''
+  /api/v1/demandes/{id}/preparer/:
+    post:
+      operationId: demandes_preparer_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prepare'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Act'
+          description: ''
+  /api/v1/demandes/{id}/reponses/:
+    get:
+      operationId: demandes_reponses_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - demandes
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseList'
+          description: ''
+    post:
+      operationId: demandes_reponses_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponseCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+          description: ''
+  /api/v1/demandes/{id}/retourner/:
+    post:
+      operationId: demandes_retourner_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReturn'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/demandes/{id}/soumettre/:
+    post:
+      operationId: demandes_soumettre_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transition'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/demandes/{id}/valider/:
+    post:
+      operationId: demandes_valider_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - demandes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transition'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+          description: ''
+  /api/v1/diffusions/{id}/:
+    get:
+      operationId: diffusions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - diffusions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dissemination'
+          description: ''
+  /api/v1/diffusions/{id}/confirmer/:
+    post:
+      operationId: diffusions_confirmer_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - diffusions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmDissemination'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dissemination'
+          description: ''
+  /api/v1/diffusions/{id}/retours/:
+    get:
+      operationId: diffusions_retours_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - diffusions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReturnList'
+          description: ''
+    post:
+      operationId: diffusions_retours_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - diffusions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedReturnList'
+          description: ''
+  /api/v1/documents/:
+    get:
+      operationId: documents_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - documents
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDocumentList'
+          description: ''
+    post:
+      operationId: documents_create
+      tags:
+      - documents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Upload'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Upload'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Upload'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+          description: ''
+  /api/v1/documents/{id}/:
+    get:
+      operationId: documents_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - documents
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+          description: ''
+  /api/v1/documents/{id}/reanalyser/:
+    post:
+      operationId: documents_reanalyser_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - documents
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Document'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Document'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Document'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+          description: ''
+  /api/v1/documents/{id}/telecharger/:
+    get:
+      operationId: documents_telecharger_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - documents
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
           description: ''
   /api/v1/dossiers/:
     get:
@@ -241,7 +1158,683 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedCaseActionList'
+                $ref: '#/components/schemas/PaginatedCaseTimelineList'
+          description: ''
+  /api/v1/feuilles/:
+    get:
+      operationId: feuilles_list
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - feuilles
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSheetList'
+          description: ''
+    post:
+      operationId: feuilles_create
+      tags:
+      - feuilles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SheetInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+          description: ''
+  /api/v1/feuilles/{id}/:
+    get:
+      operationId: feuilles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - feuilles
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+          description: ''
+    patch:
+      operationId: feuilles_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - feuilles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SheetUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sheet'
+          description: ''
+  /api/v1/feuilles/{id}/apercu/:
+    get:
+      operationId: feuilles_apercu_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - feuilles
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/feuilles/{id}/defenses/:
+    get:
+      operationId: feuilles_defenses_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - feuilles
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDefenseList'
+          description: ''
+    post:
+      operationId: feuilles_defenses_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - feuilles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefenseInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Defense'
+          description: ''
+  /api/v1/feuilles/{id}/observations/{observation_id}/appreciations/:
+    get:
+      operationId: feuilles_observations_appreciations_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - in: path
+        name: observation_id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - feuilles
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedObservationAssessmentList'
+          description: ''
+    post:
+      operationId: feuilles_observations_appreciations_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - in: path
+        name: observation_id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - feuilles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservationAssessmentInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservationAssessment'
+          description: ''
+  /api/v1/feuilles/{id}/preparer/:
+    post:
+      operationId: feuilles_preparer_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - feuilles
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Version'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/v1/missions/:
+    get:
+      operationId: missions_list
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - missions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMissionList'
+          description: ''
+    post:
+      operationId: missions_create
+      tags:
+      - missions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+  /api/v1/missions/{id}/:
+    get:
+      operationId: missions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - missions
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mission'
+          description: ''
+  /api/v1/mon-travail/:
+    get:
+      operationId: mon_travail_retrieve
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - cases
+          - decisions
+          - requests
+      tags:
+      - mon-travail
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItem'
+          description: ''
+  /api/v1/projets-feuille/{id}/telecharger/:
+    get:
+      operationId: projets_feuille_telecharger_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - projets-feuille
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/v1/renseignements/:
+    get:
+      operationId: renseignements_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - renseignements
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedIntelligenceList'
+          description: ''
+    post:
+      operationId: renseignements_create
+      tags:
+      - renseignements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntelligenceCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+          description: ''
+  /api/v1/renseignements/{id}/:
+    get:
+      operationId: renseignements_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - renseignements
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+          description: ''
+    patch:
+      operationId: renseignements_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - renseignements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntelligenceUpdate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+          description: ''
+  /api/v1/renseignements/{id}/diffusions/:
+    get:
+      operationId: renseignements_diffusions_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - renseignements
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDisseminationList'
+          description: ''
+    post:
+      operationId: renseignements_diffusions_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - renseignements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisseminationCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDisseminationList'
+          description: ''
+  /api/v1/renseignements/{id}/dossiers/:
+    get:
+      operationId: renseignements_dossiers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - renseignements
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+          description: ''
+    post:
+      operationId: renseignements_dossiers_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - renseignements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseLink'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+          description: ''
+  /api/v1/renseignements/{id}/source/:
+    get:
+      operationId: renseignements_source_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - renseignements
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Intelligence'
+          description: ''
+  /api/v1/reponses/{id}/:
+    get:
+      operationId: reponses_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - reponses
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+          description: ''
+  /api/v1/reponses/{id}/rectifier-liens/:
+    post:
+      operationId: reponses_rectifier_liens_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - reponses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rectify'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
           description: ''
   /api/v1/session/:
     get:
@@ -285,8 +1878,315 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/statistiques/:
+    get:
+      operationId: statistics_summary
+      parameters:
+      - in: query
+        name: end
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: unit
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - statistiques
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+          description: ''
+  /api/v1/statistiques/{key}/:
+    get:
+      operationId: statistics_detail
+      parameters:
+      - in: query
+        name: end
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: path
+        name: key
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+      - in: query
+        name: provenance
+        schema:
+          type: string
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date
+        required: true
+      - in: query
+        name: unit
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - statistiques
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Detail'
+          description: ''
+  /api/v1/transferts-gelec/:
+    get:
+      operationId: transferts_gelec_list
+      parameters:
+      - in: query
+        name: case
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - transferts-gelec
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGelecTransferList'
+          description: ''
+    post:
+      operationId: transferts_gelec_create
+      tags:
+      - transferts-gelec
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GelecTransfer'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GelecTransfer'
+          description: ''
+  /api/v1/transferts-gelec/{id}/:
+    get:
+      operationId: transferts_gelec_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - transferts-gelec
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GelecTransfer'
+          description: ''
+  /api/v1/transferts-gelec/{id}/confirmer-reception/:
+    post:
+      operationId: transferts_gelec_confirmer_reception_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - transferts-gelec
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmReceipt'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GelecTransfer'
+          description: ''
+  /api/v1/transferts-gelec/{id}/transmettre/:
+    post:
+      operationId: transferts_gelec_transmettre_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - transferts-gelec
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transmit'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GelecTransfer'
+          description: ''
 components:
   schemas:
+    Act:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        request_version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        imported_document:
+          type: string
+          format: uuid
+          nullable: true
+        sha256:
+          type: string
+          maxLength: 64
+        prepared_by:
+          type: integer
+        prepared_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - mode
+      - prepared_at
+      - prepared_by
+      - request_version
+      - sha256
+    Assessment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        receipt:
+          $ref: '#/components/schemas/ReceiptEnum'
+        completeness:
+          $ref: '#/components/schemas/CompletenessEnum'
+        substance:
+          $ref: '#/components/schemas/SubstanceEnum'
+        reason:
+          type: string
+          maxLength: 500
+        actor:
+          type: integer
+        recorded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor
+      - completeness
+      - id
+      - reason
+      - receipt
+      - recorded_at
+      - substance
+      - version
+    AssessmentInput:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 0
+        receipt:
+          $ref: '#/components/schemas/ReceiptEnum'
+        completeness:
+          $ref: '#/components/schemas/CompletenessEnum'
+        substance:
+          $ref: '#/components/schemas/SubstanceEnum'
+        reason:
+          type: string
+          maxLength: 500
+      required:
+      - completeness
+      - reason
+      - receipt
+      - substance
+      - version
     Assignment:
       type: object
       properties:
@@ -403,41 +2303,6 @@ components:
       - unit_code
       - updated_at
       - version
-    CaseAction:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        kind:
-          type: string
-          maxLength: 24
-        actor:
-          type: integer
-        next_action:
-          type: string
-          maxLength: 240
-        status:
-          type: string
-          maxLength: 20
-        version:
-          type: integer
-          maximum: 9223372036854775807
-          minimum: 0
-          format: int64
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-      required:
-      - actor
-      - created_at
-      - id
-      - kind
-      - next_action
-      - status
-      - version
     CaseAssignmentRead:
       type: object
       properties:
@@ -494,6 +2359,52 @@ components:
       - classification
       - next_action
       - unit
+    CaseLink:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        case:
+          type: string
+          format: uuid
+      required:
+      - case
+      - version
+    CaseTimeline:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        actor:
+          type: integer
+        next_action:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        version:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        resource_id:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - actor
+      - created_at
+      - id
+      - kind
+      - next_action
+      - status
+      - version
     CaseUpdate:
       type: object
       properties:
@@ -515,6 +2426,881 @@ components:
       description: |-
         * `0` - 0
         * `1` - 1
+    CompletenessEnum:
+      enum:
+      - unknown
+      - complete
+      - insufficient
+      type: string
+      description: |-
+        * `unknown` - Non évalué
+        * `complete` - Complet
+        * `insufficient` - Insuffisant
+    ConclusionEnum:
+      enum:
+      - pending
+      - satisfactory
+      - unsatisfactory
+      type: string
+      description: |-
+        * `pending` - À apprécier
+        * `satisfactory` - Satisfaisante
+        * `unsatisfactory` - Insuffisante
+    ConfirmDissemination:
+      type: object
+      properties:
+        sent_at:
+          type: string
+          format: date-time
+      required:
+      - sent_at
+    ConfirmReceipt:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        idempotency_key:
+          type: string
+          format: uuid
+        proof:
+          type: string
+          format: uuid
+        received_at:
+          type: string
+          format: date-time
+        reference:
+          type: string
+          default: ''
+          maxLength: 120
+      required:
+      - idempotency_key
+      - proof
+      - received_at
+      - version
+    Decision:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        case:
+          type: string
+          format: uuid
+        author:
+          type: integer
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        reason:
+          type: string
+          maxLength: 1000
+        request_assessment:
+          type: string
+          format: uuid
+          nullable: true
+        observation_assessment:
+          type: string
+          format: uuid
+          nullable: true
+        replaces:
+          type: string
+          format: uuid
+          nullable: true
+        state:
+          $ref: '#/components/schemas/DecisionStateEnum'
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        validator:
+          type: integer
+          nullable: true
+        return_comment:
+          type: string
+          maxLength: 500
+        validated_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        prototype_only:
+          type: boolean
+      required:
+      - author
+      - case
+      - created_at
+      - id
+      - kind
+      - reason
+      - updated_at
+    DecisionCreate:
+      type: object
+      properties:
+        case:
+          type: string
+          format: uuid
+        case_version:
+          type: integer
+          minimum: 1
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        reason:
+          type: string
+          maxLength: 1000
+        request_assessment:
+          type: string
+          format: uuid
+        observation_assessment:
+          type: string
+          format: uuid
+        replaces:
+          type: string
+          format: uuid
+      required:
+      - case
+      - case_version
+      - kind
+      - reason
+    DecisionEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          type: string
+          maxLength: 20
+        actor:
+          type: integer
+        comment:
+          type: string
+          maxLength: 500
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor
+      - created_at
+      - id
+      - kind
+      - version
+    DecisionReturn:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - comment
+      - version
+    DecisionStateEnum:
+      enum:
+      - proposed
+      - returned
+      - validated
+      type: string
+      description: |-
+        * `proposed` - Proposée
+        * `returned` - Retournée
+        * `validated` - Validée
+    DecisionTransition:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+      required:
+      - version
+    Defense:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        sheet:
+          type: string
+          format: uuid
+        letter:
+          type: string
+          format: uuid
+        annexes:
+          type: array
+          items:
+            type: string
+            format: uuid
+        observations:
+          type: array
+          items:
+            type: string
+            format: uuid
+        received_on:
+          type: string
+          format: date
+        recorded_at:
+          type: string
+          format: date-time
+          readOnly: true
+        recorded_by:
+          type: integer
+        complement_of:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - id
+      - letter
+      - observations
+      - received_on
+      - recorded_at
+      - recorded_by
+      - sheet
+    DefenseInput:
+      type: object
+      properties:
+        letter:
+          type: string
+          format: uuid
+        annexes:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+        received_on:
+          type: string
+          format: date
+        complement_of:
+          type: string
+          format: uuid
+        observation_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+      required:
+      - letter
+      - observation_ids
+      - received_on
+    Detail:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        definition:
+          type: string
+        definition_version:
+          type: string
+        unit:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        count:
+          type: integer
+        provenance:
+          type: string
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetailItem'
+      required:
+      - count
+      - definition
+      - definition_version
+      - end
+      - key
+      - label
+      - next
+      - previous
+      - results
+      - start
+      - unit
+    DetailItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+      required:
+      - id
+      - url
+    Dissemination:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        intelligence:
+          type: string
+          format: uuid
+          readOnly: true
+        recipient_unit:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          type: string
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+        expected_action:
+          type: string
+          readOnly: true
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - channel
+      - created_at
+      - expected_action
+      - id
+      - intelligence
+      - recipient_unit
+      - reference
+      - sent_at
+    DisseminationCreate:
+      type: object
+      properties:
+        recipient_unit:
+          type: string
+          format: uuid
+        channel:
+          type: string
+          maxLength: 80
+        reference:
+          type: string
+          maxLength: 120
+        expected_action:
+          type: string
+          maxLength: 500
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        idempotency_key:
+          type: string
+          format: uuid
+      required:
+      - channel
+      - expected_action
+      - idempotency_key
+      - recipient_unit
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        case:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        intelligence:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        original_name:
+          type: string
+          readOnly: true
+        content_type:
+          type: string
+          readOnly: true
+        size:
+          type: integer
+          readOnly: true
+        sha256:
+          type: string
+          readOnly: true
+        state:
+          allOf:
+          - $ref: '#/components/schemas/DocumentStateEnum'
+          readOnly: true
+        uploaded_at:
+          type: string
+          format: date-time
+          readOnly: true
+        scanned_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - case
+      - content_type
+      - id
+      - intelligence
+      - original_name
+      - scanned_at
+      - sha256
+      - size
+      - state
+      - uploaded_at
+    DocumentStateEnum:
+      enum:
+      - quarantine
+      - accepted
+      - rejected
+      - missing
+      type: string
+      description: |-
+        * `quarantine` - En quarantaine
+        * `accepted` - Accepté
+        * `rejected` - Rejeté
+        * `missing` - Fichier manquant
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          type: string
+          maxLength: 24
+        actor:
+          type: integer
+        act:
+          type: string
+          format: uuid
+          nullable: true
+        proof:
+          type: string
+          format: uuid
+          nullable: true
+        comment:
+          type: string
+          maxLength: 500
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        factual_at:
+          type: string
+          format: date-time
+          nullable: true
+        occurred_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor
+      - id
+      - kind
+      - occurred_at
+      - version
+    Family:
+      type: object
+      properties:
+        key:
+          type: string
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Indicator'
+      required:
+      - indicators
+      - key
+    GelecTransfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        decision:
+          type: string
+          format: uuid
+        case:
+          type: string
+          format: uuid
+          readOnly: true
+        prepared_by:
+          type: integer
+        prepared_at:
+          type: string
+          format: date-time
+          readOnly: true
+        state:
+          $ref: '#/components/schemas/GelecTransferStateEnum'
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        reference:
+          type: string
+          maxLength: 120
+        transmission_reference:
+          type: string
+          maxLength: 120
+        transmission_proof:
+          type: string
+          format: uuid
+          nullable: true
+        transmitted_by:
+          type: integer
+          nullable: true
+        transmitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        transmission_recorded_at:
+          type: string
+          format: date-time
+          nullable: true
+        receipt_proof:
+          type: string
+          format: uuid
+          nullable: true
+        confirmed_by:
+          type: integer
+          nullable: true
+        received_at:
+          type: string
+          format: date-time
+          nullable: true
+        confirmation_recorded_at:
+          type: string
+          format: date-time
+          nullable: true
+        prototype_only:
+          type: boolean
+      required:
+      - case
+      - decision
+      - id
+      - prepared_at
+      - prepared_by
+    GelecTransferStateEnum:
+      enum:
+      - prepared
+      - transmitted
+      - confirmed
+      type: string
+      description: |-
+        * `prepared` - Préparé
+        * `transmitted` - Transmis
+        * `confirmed` - Réception confirmée
+    Indicator:
+      type: object
+      properties:
+        key:
+          type: string
+        unit:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        label:
+          type: string
+        definition:
+          type: string
+        definition_version:
+          type: string
+        value:
+          type: integer
+          nullable: true
+        detail_url:
+          type: string
+          nullable: true
+        status:
+          type: string
+        reason:
+          type: string
+        provenance:
+          type: string
+      required:
+      - definition
+      - definition_version
+      - detail_url
+      - end
+      - key
+      - label
+      - start
+      - status
+      - unit
+      - value
+    Intelligence:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        unit:
+          type: string
+          format: uuid
+          readOnly: true
+        classification:
+          type: integer
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        summary:
+          type: string
+          readOnly: true
+        provenance:
+          type: string
+          readOnly: true
+        occurred_on:
+          type: string
+          format: date
+          readOnly: true
+        assignee:
+          type: integer
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - assignee
+      - classification
+      - created_at
+      - id
+      - occurred_on
+      - provenance
+      - subject
+      - summary
+      - unit
+      - updated_at
+      - version
+    IntelligenceCreate:
+      type: object
+      properties:
+        unit:
+          type: string
+          format: uuid
+        classification:
+          $ref: '#/components/schemas/ClassificationEnum'
+        subject:
+          type: string
+          maxLength: 240
+        summary:
+          type: string
+          maxLength: 4000
+        provenance:
+          type: string
+          maxLength: 120
+        occurred_on:
+          type: string
+          format: date
+        assignee:
+          type: integer
+          minimum: 1
+        source_identity:
+          type: string
+          writeOnly: true
+          maxLength: 1000
+      required:
+      - assignee
+      - classification
+      - occurred_on
+      - provenance
+      - subject
+      - summary
+      - unit
+    IntelligenceUpdate:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        subject:
+          type: string
+          maxLength: 240
+        summary:
+          type: string
+          maxLength: 4000
+        provenance:
+          type: string
+          maxLength: 120
+        occurred_on:
+          type: string
+          format: date
+      required:
+      - version
+    Issuance:
+      type: object
+      properties:
+        act:
+          type: string
+          format: uuid
+        signature_proof:
+          type: string
+          format: uuid
+        dispatch_proof:
+          type: string
+          format: uuid
+        issued_at:
+          type: string
+          format: date-time
+        recorded_at:
+          type: string
+          format: date-time
+          readOnly: true
+        prototype_only:
+          type: boolean
+      required:
+      - act
+      - dispatch_proof
+      - issued_at
+      - recorded_at
+      - signature_proof
+    Issue:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        idempotency_key:
+          type: string
+          format: uuid
+        dispatch_proof:
+          type: string
+          format: uuid
+        sent_at:
+          type: string
+          format: date-time
+      required:
+      - dispatch_proof
+      - idempotency_key
+      - sent_at
+      - version
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        label:
+          type: string
+          maxLength: 500
+        assessment_version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+      required:
+      - id
+      - label
+      - number
+    ItemInput:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 500
+      required:
+      - label
+    KindEnum:
+      enum:
+      - classification
+      - mission
+      - complement
+      - gelec
+      type: string
+      description: |-
+        * `classification` - Classement sans suite
+        * `mission` - Mission complémentaire
+        * `complement` - Demande de complément
+        * `gelec` - Relais GELEC
+    Link:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        item:
+          type: string
+          format: uuid
+        added_by:
+          type: integer
+        added_at:
+          type: string
+          format: date-time
+          readOnly: true
+        voided_by:
+          type: integer
+          nullable: true
+        voided_at:
+          type: string
+          format: date-time
+          nullable: true
+        reason:
+          type: string
+          maxLength: 500
+      required:
+      - added_at
+      - added_by
+      - id
+      - item
     Login:
       type: object
       properties:
@@ -527,6 +3313,225 @@ components:
       required:
       - password
       - username
+    Mission:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        case:
+          type: string
+          format: uuid
+        author:
+          type: integer
+        context:
+          type: string
+          maxLength: 500
+        findings:
+          type: string
+          maxLength: 4000
+        occurred_on:
+          type: string
+          format: date
+        participants:
+          type: array
+          items:
+            type: integer
+        documents:
+          type: array
+          items:
+            type: string
+            format: uuid
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author
+      - case
+      - context
+      - created_at
+      - findings
+      - id
+      - occurred_on
+      - participants
+    MissionInput:
+      type: object
+      properties:
+        case:
+          type: string
+          format: uuid
+        context:
+          type: string
+          maxLength: 500
+        findings:
+          type: string
+          maxLength: 4000
+        occurred_on:
+          type: string
+          format: date
+        participants:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          maxItems: 20
+        documents:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+      required:
+      - case
+      - context
+      - findings
+      - occurred_on
+      - participants
+    ModeEnum:
+      enum:
+      - generated
+      - imported
+      type: string
+      description: |-
+        * `generated` - Format Procezo
+        * `imported` - Document de l'agent
+    Observation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        facts:
+          type: string
+          maxLength: 2000
+        documents:
+          type: array
+          items:
+            type: string
+            format: uuid
+        assessment_version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+      required:
+      - facts
+      - id
+      - number
+    ObservationAssessment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        observation:
+          type: string
+          format: uuid
+        defense:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        conclusion:
+          $ref: '#/components/schemas/ConclusionEnum'
+        reason:
+          type: string
+          maxLength: 500
+        actor:
+          type: integer
+        recorded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor
+      - conclusion
+      - defense
+      - id
+      - observation
+      - reason
+      - recorded_at
+      - version
+    ObservationAssessmentInput:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 0
+        defense:
+          type: string
+          format: uuid
+        conclusion:
+          $ref: '#/components/schemas/ConclusionEnum'
+        reason:
+          type: string
+          maxLength: 500
+      required:
+      - conclusion
+      - defense
+      - reason
+      - version
+    ObservationInput:
+      type: object
+      properties:
+        facts:
+          type: string
+          maxLength: 2000
+        documents:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+      required:
+      - facts
+    OriginEnum:
+      enum:
+      - mission
+      - intelligence
+      - system
+      - field
+      type: string
+      description: |-
+        * `mission` - Mission
+        * `intelligence` - Renseignement
+        * `system` - Système
+        * `field` - Constat terrain
+    PaginatedAssessmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Assessment'
     PaginatedAuditEventList:
       type: object
       required:
@@ -550,29 +3555,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditEvent'
-    PaginatedCaseActionList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/CaseAction'
     PaginatedCaseAssignmentReadList:
       type: object
       required:
@@ -619,6 +3601,713 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Case'
+    PaginatedCaseTimelineList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CaseTimeline'
+    PaginatedDecisionEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionEvent'
+    PaginatedDecisionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Decision'
+    PaginatedDefenseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Defense'
+    PaginatedDisseminationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dissemination'
+    PaginatedDocumentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+    PaginatedEventList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+    PaginatedGelecTransferList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GelecTransfer'
+    PaginatedIntelligenceList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Intelligence'
+    PaginatedMissionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mission'
+    PaginatedObservationAssessmentList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservationAssessment'
+    PaginatedRequestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Request'
+    PaginatedResponseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Response'
+    PaginatedReturnList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Return'
+    PaginatedSheetList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sheet'
+    Prepare:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        document:
+          type: string
+          format: uuid
+      required:
+      - version
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        sheet:
+          type: string
+          format: uuid
+        sheet_version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        sha256:
+          type: string
+          maxLength: 64
+        prepared_by:
+          type: integer
+        prepared_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - prepared_at
+      - prepared_by
+      - sha256
+      - sheet
+      - sheet_version
+    ReceiptEnum:
+      enum:
+      - not_received
+      - received
+      type: string
+      description: |-
+        * `not_received` - Non reçu
+        * `received` - Reçu
+    Rectify:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        add_item_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+        remove_link_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+        reason:
+          type: string
+          maxLength: 500
+      required:
+      - reason
+      - version
+    Request:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        case:
+          type: string
+          format: uuid
+        author:
+          type: integer
+        target_type:
+          $ref: '#/components/schemas/TargetTypeEnum'
+        target_name:
+          type: string
+          maxLength: 240
+        represented_name:
+          type: string
+          maxLength: 240
+        subject:
+          type: string
+          maxLength: 240
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        due_on:
+          type: string
+          format: date
+          nullable: true
+        state:
+          $ref: '#/components/schemas/RequestStateEnum'
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Item'
+          readOnly: true
+        acts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Act'
+          readOnly: true
+        issuance:
+          allOf:
+          - $ref: '#/components/schemas/Issuance'
+          readOnly: true
+      required:
+      - acts
+      - author
+      - case
+      - created_at
+      - id
+      - issuance
+      - items
+      - mode
+      - subject
+      - target_name
+      - target_type
+      - updated_at
+    RequestCreate:
+      type: object
+      properties:
+        case:
+          type: string
+          format: uuid
+        target_type:
+          $ref: '#/components/schemas/TargetTypeEnum'
+        target_name:
+          type: string
+          maxLength: 240
+        represented_name:
+          type: string
+          default: ''
+          maxLength: 240
+        subject:
+          type: string
+          maxLength: 240
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        due_on:
+          type: string
+          format: date
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemInput'
+      required:
+      - case
+      - items
+      - mode
+      - subject
+      - target_name
+      - target_type
+    RequestReturn:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        comment:
+          type: string
+          maxLength: 500
+      required:
+      - comment
+      - version
+    RequestStateEnum:
+      enum:
+      - draft
+      - submitted
+      - validated
+      - signed
+      - issued
+      type: string
+      description: |-
+        * `draft` - Brouillon
+        * `submitted` - Soumis
+        * `validated` - Validé
+        * `signed` - Signature constatée
+        * `issued` - Émis
+    RequestUpdate:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        target_type:
+          $ref: '#/components/schemas/TargetTypeEnum'
+        target_name:
+          type: string
+          maxLength: 240
+        represented_name:
+          type: string
+          maxLength: 240
+        subject:
+          type: string
+          maxLength: 240
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        due_on:
+          type: string
+          format: date
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ItemInput'
+      required:
+      - version
+    Response:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        request:
+          type: string
+          format: uuid
+        letter:
+          type: string
+          format: uuid
+        annexes:
+          type: array
+          items:
+            type: string
+            format: uuid
+        received_on:
+          type: string
+          format: date
+        recorded_at:
+          type: string
+          format: date-time
+          readOnly: true
+        recorded_by:
+          type: integer
+        complement_of:
+          type: string
+          format: uuid
+          nullable: true
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        item_links:
+          type: array
+          items:
+            $ref: '#/components/schemas/Link'
+          readOnly: true
+      required:
+      - id
+      - item_links
+      - letter
+      - received_on
+      - recorded_at
+      - recorded_by
+      - request
+    ResponseCreate:
+      type: object
+      properties:
+        letter:
+          type: string
+          format: uuid
+        annexes:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+        received_on:
+          type: string
+          format: date
+        complement_of:
+          type: string
+          format: uuid
+        item_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 20
+      required:
+      - item_ids
+      - letter
+      - received_on
+    Return:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        dissemination:
+          type: string
+          format: uuid
+          readOnly: true
+        acknowledged:
+          type: boolean
+          readOnly: true
+        received_at:
+          type: string
+          format: date-time
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        recorded_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - acknowledged
+      - dissemination
+      - id
+      - note
+      - received_at
+      - recorded_at
+    ReturnCreate:
+      type: object
+      properties:
+        acknowledged:
+          type: boolean
+          default: false
+        received_at:
+          type: string
+          format: date-time
+        note:
+          type: string
+          maxLength: 1000
+        idempotency_key:
+          type: string
+          format: uuid
+      required:
+      - idempotency_key
+      - received_at
     SessionResponse:
       type: object
       properties:
@@ -626,6 +4315,166 @@ components:
           type: boolean
       required:
       - authenticated
+    Sheet:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        case:
+          type: string
+          format: uuid
+        author:
+          type: integer
+        mission:
+          type: string
+          format: uuid
+          nullable: true
+        origin:
+          $ref: '#/components/schemas/OriginEnum'
+        recipient_address:
+          type: string
+          maxLength: 500
+        concerned_party:
+          type: string
+          maxLength: 240
+        facts:
+          type: string
+          maxLength: 4000
+        version:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        prototype_only:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Observation'
+          readOnly: true
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+          readOnly: true
+      required:
+      - author
+      - case
+      - concerned_party
+      - created_at
+      - facts
+      - id
+      - observations
+      - origin
+      - projects
+      - recipient_address
+      - updated_at
+    SheetInput:
+      type: object
+      properties:
+        case:
+          type: string
+          format: uuid
+        mission:
+          type: string
+          format: uuid
+          nullable: true
+        origin:
+          $ref: '#/components/schemas/OriginEnum'
+        recipient_address:
+          type: string
+          maxLength: 500
+        concerned_party:
+          type: string
+          maxLength: 240
+        facts:
+          type: string
+          maxLength: 4000
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservationInput'
+      required:
+      - case
+      - concerned_party
+      - facts
+      - observations
+      - origin
+      - recipient_address
+    SheetUpdate:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        recipient_address:
+          type: string
+          maxLength: 500
+        concerned_party:
+          type: string
+          maxLength: 240
+        facts:
+          type: string
+          maxLength: 4000
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObservationInput'
+      required:
+      - version
+    Sign:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        proof:
+          type: string
+          format: uuid
+        signed_at:
+          type: string
+          format: date-time
+      required:
+      - proof
+      - signed_at
+      - version
+    Statistics:
+      type: object
+      properties:
+        unit:
+          type: string
+          format: uuid
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+        definition_version:
+          type: string
+        prototype_only:
+          type: boolean
+        families:
+          type: array
+          items:
+            $ref: '#/components/schemas/Family'
+      required:
+      - definition_version
+      - end
+      - families
+      - prototype_only
+      - start
+      - unit
     StatusEnum:
       enum:
       - open
@@ -634,6 +4483,146 @@ components:
       description: |-
         * `open` - Ouvert
         * `in_progress` - En cours
+    SubstanceEnum:
+      enum:
+      - pending
+      - satisfactory
+      - unsatisfactory
+      type: string
+      description: |-
+        * `pending` - Non apprécié
+        * `satisfactory` - Satisfaisant
+        * `unsatisfactory` - Non satisfaisant
+    TargetTypeEnum:
+      enum:
+      - broker
+      - organization
+      type: string
+      description: |-
+        * `broker` - Commissionnaire en douane
+        * `organization` - Entreprise ou ONG
+    TransferCreate:
+      type: object
+      properties:
+        decision:
+          type: string
+          format: uuid
+      required:
+      - decision
+    Transition:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+      required:
+      - version
+    Transmit:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        idempotency_key:
+          type: string
+          format: uuid
+        proof:
+          type: string
+          format: uuid
+        transmitted_at:
+          type: string
+          format: date-time
+        reference:
+          type: string
+          default: ''
+          maxLength: 120
+      required:
+      - idempotency_key
+      - proof
+      - transmitted_at
+      - version
+    Upload:
+      type: object
+      properties:
+        case:
+          type: string
+          format: uuid
+        intelligence:
+          type: string
+          format: uuid
+        file:
+          type: string
+          format: uri
+      required:
+      - file
+    ValidationItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        case:
+          type: string
+          format: uuid
+        status:
+          type: string
+        due_on:
+          type: string
+          format: date
+          nullable: true
+        overdue:
+          type: boolean
+        action_url:
+          type: string
+      required:
+      - action_url
+      - case
+      - due_on
+      - id
+      - overdue
+      - status
+    Version:
+      type: object
+      properties:
+        version:
+          type: integer
+          minimum: 1
+      required:
+      - version
+    WorkItem:
+      type: object
+      properties:
+        kind:
+          type: string
+        id:
+          type: string
+          format: uuid
+        case:
+          type: string
+          format: uuid
+        reference:
+          type: string
+        status:
+          type: string
+        next_action:
+          type: string
+        due_on:
+          type: string
+          format: date
+          nullable: true
+        overdue:
+          type: boolean
+        returned:
+          type: boolean
+        internal_alert:
+          type: boolean
+        action_url:
+          type: string
+      required:
+      - action_url
+      - case
+      - id
+      - status
   securitySchemes:
     cookieAuth:
       type: apiKey

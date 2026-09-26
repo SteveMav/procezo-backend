@@ -20,6 +20,14 @@ def has_delegation(actor, action, unit, *, now=None):
 def can(actor, action, resource=None, context=None):
     """Prototype policy. A missing membership, scope or clearance always denies."""
     context = context or {}
+    if action == "intelligence.read" and resource is not None:
+        recipient_scope = active_memberships(actor).filter(
+            role=Membership.Role.MANAGER,
+            clearance__gte=resource.classification,
+            unit__in=resource.disseminations.filter(sent_at__isnull=False).values("recipient_unit_id"),
+        )
+        if recipient_scope.exists():
+            return True
     unit = getattr(resource, "unit", None) or context.get("unit")
     if unit is None:
         return False
@@ -40,6 +48,31 @@ def can(actor, action, resource=None, context=None):
         return Membership.Role.INVESTIGATOR in roles and resource is not None and resource.assignee_id == actor.pk
     if action == "audit.read":
         return Membership.Role.AUDITOR in roles and has_delegation(actor, Delegation.Action.AUDIT_READ, unit)
+    if action == "intelligence.create":
+        return Membership.Role.MANAGER in roles or Membership.Role.INVESTIGATOR in roles
+    if action in ("intelligence.read", "intelligence.update"):
+        if Membership.Role.MANAGER in roles:
+            return True
+        return Membership.Role.INVESTIGATOR in roles and resource is not None and resource.assignee_id == actor.pk
+    if action == "intelligence.distribute":
+        return Membership.Role.MANAGER in roles and has_delegation(actor, Delegation.Action.INTELLIGENCE_DISTRIBUTE, unit)
+    if action in ("source.read", "source.write"):
+        delegation = Delegation.Action.SOURCE_READ if action == "source.read" else Delegation.Action.SOURCE_WRITE
+        return Membership.Role.MANAGER in roles and has_delegation(actor, delegation, unit)
+    if action in ("request.validate", "request.sign", "request.issue"):
+        delegation = {
+            "request.validate": Delegation.Action.REQUEST_VALIDATE,
+            "request.sign": Delegation.Action.REQUEST_SIGN,
+            "request.issue": Delegation.Action.REQUEST_ISSUE,
+        }[action]
+        return Membership.Role.MANAGER in roles and has_delegation(actor, delegation, unit)
+    if action in ("decision.validate", "gelec.transfer", "gelec.confirm"):
+        delegation = {
+            "decision.validate": Delegation.Action.DECISION_VALIDATE,
+            "gelec.transfer": Delegation.Action.GELEC_TRANSFER,
+            "gelec.confirm": Delegation.Action.GELEC_CONFIRM,
+        }[action]
+        return Membership.Role.MANAGER in roles and has_delegation(actor, delegation, unit)
     return False
 
 
@@ -57,3 +90,20 @@ def visible_cases(actor):
         elif membership.role == Membership.Role.INVESTIGATOR:
             scope |= allowed & Q(assignee=actor)
     return Case.objects.filter(scope).distinct()
+
+
+def visible_intelligence(actor):
+    from intelligence.models import Intelligence
+
+    memberships = list(active_memberships(actor))
+    if not memberships:
+        return Intelligence.objects.none()
+    scope = Q(pk__in=[])
+    for membership in memberships:
+        allowed = Q(unit=membership.unit, classification__lte=membership.clearance)
+        if membership.role == Membership.Role.MANAGER:
+            scope |= allowed
+            scope |= Q(disseminations__recipient_unit=membership.unit, disseminations__sent_at__isnull=False, classification__lte=membership.clearance)
+        elif membership.role == Membership.Role.INVESTIGATOR:
+            scope |= allowed & Q(assignee=actor)
+    return Intelligence.objects.filter(scope).distinct()

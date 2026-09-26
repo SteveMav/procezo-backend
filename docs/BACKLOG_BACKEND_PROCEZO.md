@@ -12,7 +12,7 @@
 
 ## Contrat de planification
 
-Ce document est un backlog **backend**, destiné au développement et à la recette du pilote V1. Il s'appuie sur [l'architecture backend](ARCHITECTURE_BACKEND_PROCEZO.md) et le [PRD V1](PRD_PROCEZO_V1.md). Au moment de sa rédaction, ce dossier contient des documents, mais aucun code backend ni dépôt Git : les noms de modules ci-dessous sont des responsabilités proposées par l'architecture, pas des chemins déjà présents.
+Ce document est un backlog **backend**, destiné au développement et à la recette du pilote V1. Il s'appuie sur [l'architecture backend](ARCHITECTURE_BACKEND_PROCEZO.md) et le [PRD V1](PRD_PROCEZO_V1.md). Les modules BE-01 à BE-18 et la préparation BE-22 sont désormais présents dans le dépôt ; les modules des étapes suivantes restent des responsabilités proposées tant qu'ils ne sont pas implémentés.
 
 La V1 couvre les renseignements, dossiers, affectations, demandes, réponses, missions facultatives, feuilles, défenses, décisions humaines, relais GELEC manuel et cinq familles de statistiques. Le contentieux détaillé, le calcul et le recouvrement, le portail des tiers et les synchronisations GELEC/SYDONIA sont exclus. Une migration de l'ancien Procezo n'est pas présumée.
 
@@ -28,6 +28,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 ## Backlog priorisé
 
 ### Étape 1 — Socle sûr et premier dossier (BE-01 à BE-04)
+
+**Statut : fait pour le prototype fictif (BE-01 à BE-04).** API, droits, audit, dossier et affectations livrés ; 14 tests passés, migrations appliquées et schéma OpenAPI validé. Voir le [guide d'exécution](../README.md).
 
 **But :** obtenir un premier parcours de bout en bout, avec autorisation et audit dès le départ. **Sortie :** un agent autorisé ouvre un dossier fictif, voit son responsable et sa prochaine action ; un autre agent est refusé ; une réaffectation reste historisée.
 
@@ -77,6 +79,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 
 ### Étape 2 — Renseignement, diffusion et fichiers privés (BE-05 à BE-07, BE-22)
 
+**Statut : fait pour le prototype fictif sur SQLite (BE-05 à BE-07 et préparation BE-22).** Les modules `intelligence` et `documents`, la quarantaine, l'analyse ClamAV configurable, les migrations et la CI SQLite/PostgreSQL sont présents ; 26 tests SQLite passent. La validation PostgreSQL et la répétition du transfert seront faites plus tard. La configuration du scanner dans l'environnement pilote et l'usage réel attendent les décisions DGDA.
+
 **But :** couvrir le renseignement autonome et poser la frontière des pièces avant les actes. **Sortie :** un renseignement sans cible peut être diffusé à deux unités sans dévoiler sa source ; un fichier n'est accessible qu'après contrôle.
 
 ### BE-05 — Enregistrer un renseignement, y compris sans cible
@@ -124,6 +128,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 - **Terminé lorsque :** critères démontrés, vérification passée et contrat API ou migration mis à jour si nécessaire.
 
 ### Étape 3 — Demandes, actes et réponses (BE-08 à BE-12, BE-18)
+
+**Statut : fait (prototype fictif).** Les demandes et leurs éléments versionnés, deux modes de préparation, versions de projet privées, transitions distinctes, réponses et rectifications historisées, appréciations par élément et vues de travail sont implémentés. Les constats de signature et d'émission restent des enregistrements fictifs ; DEC-02/03 bloquent toujours l'usage réel.
 
 **But :** achever le parcours d'une demande depuis le brouillon jusqu'à l'analyse des réponses. **Sortie :** les deux modes de préparation rejoignent la même validation et conservent l'acte réellement envoyé ; deux réponses successives restent distinctes.
 
@@ -195,6 +201,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 
 ### Étape 4 — Mission, feuille et défenses (BE-13 à BE-15)
 
+**Statut : fait pour le prototype fictif sur SQLite (BE-13 à BE-15).** Missions, feuilles versionnées, PDF de projet privé, défenses et appréciations historisées sont présents. Les origines et le modèle officiels restent soumis à DEC-03 avant tout acte réel.
+
 **But :** couvrir les constats avec ou sans mission lorsque la règle DGDA l'autorise. **Sortie :** une feuille à deux observations accepte une défense partielle et un complément, sans perte d'historique.
 
 ### BE-13 — Enregistrer une mission facultative
@@ -232,6 +240,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 
 ### Étape 5 — Décision humaine et relais GELEC (BE-16 à BE-17)
 
+**Statut : fait pour le prototype fictif (BE-16 et BE-17).** Propositions motivées liées aux appréciations, retours et validations habilitées, rectifications historisées, transmission GELEC manuelle et réception confirmée séparément sont disponibles. Les actes réels attendent DEC-02 et DEC-04.
+
 **But :** terminer les dossiers par une décision vérifiable. **Sortie :** classement ou relais uniquement après validation habilitée ; transmission GELEC et réception restent deux faits distincts.
 
 ### BE-16 — Valider une suite motivée
@@ -258,6 +268,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 
 ### Étape 6 — Statistiques vérifiables (BE-19)
 
+**Statut : fait pour le prototype fictif (BE-19), avec indicateurs sans preuve masqués.** Les valeurs publiées utilisent les objets visibles et une liste de détail issue de la même règle de calcul ; la provenance et les suites documentées sont dédupliquées. Les définitions métier, les effets et la preuve de PV attendent la DGDA avant toute diffusion réelle.
+
 **But :** obtenir les cinq familles de chiffres sans double compte ni fuite de données. **Sortie :** chaque valeur ouvre exactement les objets autorisés qui la composent.
 
 ### BE-19 — Produire les cinq familles de statistiques
@@ -272,6 +284,8 @@ Les priorités `P0` et `P1` indiquent l'ordre de construction, sans retirer le c
 - **Terminé lorsque :** critères démontrés, vérification passée et contrat API ou migration mis à jour si nécessaire.
 
 ### Étape 7 — Recette technique et ouverture du pilote (BE-20, BE-21, BE-23)
+
+**Statut : préparation technique livrée sur données fictives ; ouverture du pilote réel en attente.** La matrice transversale, les trois parcours d'intégration, la sauvegarde/restauration SQLite et la sonde d'exploitation sont présents. La mesure sur réseau et volume pilotes, la copie chiffrée hors hôte, l'exercice d'incident sur l'infrastructure retenue et les validations DGDA restent nécessaires. Voir le [dossier de recette technique](RECETTE_TECHNIQUE_PILOTE.md).
 
 **But :** consolider les preuves de sécurité, de performance et de reprise. Les tests de BE-20 se construisent au fil des étapes précédentes ; cette étape clôt leur couverture, elle ne reporte pas la sécurité à la fin.
 

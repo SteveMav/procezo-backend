@@ -48,3 +48,14 @@ class CaseActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CaseAction
         fields = ["id", "kind", "actor", "next_action", "status", "version", "created_at"]
+
+
+class CaseTimelineSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    kind = serializers.CharField()
+    actor = serializers.IntegerField()
+    next_action = serializers.CharField(allow_null=True)
+    status = serializers.CharField(allow_null=True)
+    version = serializers.IntegerField(allow_null=True)
+    created_at = serializers.DateTimeField()
+    resource_id = serializers.UUIDField(allow_null=True, required=False)
